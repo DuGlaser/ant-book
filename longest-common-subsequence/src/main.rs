@@ -9,7 +9,6 @@ fn main() {
         t: Chars,
     };
 
-    // たて s
     let mut dp = vec![vec![0; n + 1]; m + 1];
 
     for i in 1..=m {
