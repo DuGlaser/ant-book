@@ -24,7 +24,7 @@ impl UnionFind {
         }
     }
 
-    /// xとyの要素を合併する
+    /// xとyの木を結合する関数
     fn unite(&mut self, x: usize, y: usize) -> Result<(), ()> {
         let mut x = self.find(x);
         let mut y = self.find(y);
@@ -57,27 +57,24 @@ fn main() {
     input! {
         n: usize,
         k: usize,
-        txy: [(usize, usize, usize); k]
     }
 
-    let txy: Vec<(usize, usize, usize)> = txy;
-
-    // x, x + n, x + 2 * n をx-A, x-B, x-Cとする
-    let mut uf = UnionFind::new(n * 3);
+    // 1 => A-1
+    // 1 + n => B-1
+    // 1 + 2n => C-1
+    let mut uf = UnionFind::new(n * 3 + 1);
 
     let mut ans = 0;
 
-    for i in txy.iter() {
-        if i.1 == 0 || i.2 == 0 {
-            ans += 1;
-            continue;
+    for _ in 0..k {
+        input! {
+            t: usize,
+            x: usize,
+            y: usize,
         }
 
-        let t = i.0;
-        let x = i.1 - 1;
-        let y = i.2 - 1;
-
-        if n <= x || n <= y {
+        // 入力値にマイナスが含まれないこと前提
+        if x > n || y > n {
             ans += 1;
             continue;
         }
@@ -85,19 +82,23 @@ fn main() {
         if t == 1 {
             if uf.same(x, y + n) || uf.same(x, y + 2 * n) {
                 ans += 1;
-            } else {
-                uf.unite(x, y);
-                uf.unite(x + n, y + n);
-                uf.unite(x + n * 2, y + n * 2);
+                continue;
             }
+
+            let _ = uf.unite(x, y);
+            let _ = uf.unite(x + n, y + n);
+            let _ = uf.unite(x + 2 * n, y + 2 * n);
         } else {
             if uf.same(x, y) || uf.same(x, y + 2 * n) {
                 ans += 1;
-            } else {
-                uf.unite(x, y + n);
-                uf.unite(x + n, y + 2 * n);
-                uf.unite(x + n * 2, y);
+                continue;
             }
+
+            // type1の時に矛盾があるかどうかを判断するために
+            // 下のような併合を行う
+            let _ = uf.unite(x, y + n);
+            let _ = uf.unite(x + n, y + 2 * n);
+            let _ = uf.unite(x + 2 * n, y);
         }
     }
 
